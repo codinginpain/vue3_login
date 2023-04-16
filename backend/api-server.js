@@ -4,6 +4,7 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const members = [
   {
@@ -42,7 +43,18 @@ app.post('/api/account', (req, res) => {
 
   const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw);
   if(member) {
-    res.cookie("account", JSON.stringify(member));
+    const token = jwt.sign(
+      {
+        id:member.id,
+        name: member.name 
+      }, 
+      "salt123456774",  //salt
+      {
+        expiresIn: "15m", //15minutes
+        issuer: "codinginpain"
+      }
+    );
+    res.cookie("token", token);
     res.send(member);
   }
   res.send(404);
